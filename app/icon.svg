@@ -1,0 +1,39 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8a8a8" />
+      <stop offset="50%" stop-color="#e8e8e8" />
+      <stop offset="100%" stop-color="#a8a8a8" />
+    </linearGradient>
+    <linearGradient id="globeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e5a9e" />
+      <stop offset="50%" stop-color="#2d7dd2" />
+      <stop offset="100%" stop-color="#1a4a8a" />
+    </linearGradient>
+    <linearGradient id="arrowGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#4ade80" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Chrome ring -->
+  <circle cx="50" cy="50" r="48" fill="none" stroke="url(#ringGradient)" stroke-width="3" />
+  
+  <!-- Blue globe -->
+  <circle cx="50" cy="50" r="44" fill="url(#globeGradient)" />
+  
+  <!-- Globe grid lines -->
+  <ellipse cx="50" cy="50" rx="30" ry="44" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+  <ellipse cx="50" cy="50" rx="15" ry="44" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+  <line x1="6" y1="50" x2="94" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width="1" />
+  
+  <!-- Green arrow -->
+  <path 
+    d="M 25 65 L 50 40 L 55 45 L 75 20 L 72 35 L 82 32 L 60 55 L 55 50 L 35 70 Z" 
+    fill="url(#arrowGradient)"
+    stroke="#15803d"
+    stroke-width="1"
+  />
+</svg>
+
+

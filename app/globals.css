@@ -1,26 +1,263 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /* W.E.T. Signature Blue Theme - Professional with Playful Accents */
+  
+  /* Backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-elevated: #ffffff;
+  --color-bg-surface: #f1f5f9;
+  --color-bg-hover: #e2e8f0;
+  --color-bg-dark: #0a1628;
+  --color-bg-accent: #0066cc;
+  
+  /* Text */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-text-inverse: #ffffff;
+  
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-border-accent: #0066cc;
+  
+  /* Brand Colors - Matching the W.E.T. Logo */
+  --color-brand-primary: #0066cc;      /* Signature blue */
+  --color-brand-blue-light: #3b82f6;   /* Lighter blue for hover */
+  --color-brand-blue-dark: #1e40af;    /* Deep blue */
+  --color-brand-accent: #10b981;       /* Green arrow accent */
+  --color-brand-gold: #f59e0b;         /* Gold highlight */
+  --color-brand-red: #dc2626;          /* Reserved for breaking/live */
+  
+  /* Market Colors */
+  --color-market-up: #10b981;
+  --color-market-down: #ef4444;
+  --color-market-neutral: #0066cc;
+  
+  /* Live/Breaking - Keep red for urgency (news standard) */
+  --color-live: #dc2626;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Container */
+.container-wet {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-wet {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-wet {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Headline hierarchy */
+.headline-hero {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+@media (min-width: 768px) {
+  .headline-hero {
+    font-size: 1.875rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .headline-hero {
+    font-size: 2.25rem;
+  }
+}
+
+.headline-large {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+@media (min-width: 768px) {
+  .headline-large {
+    font-size: 1.5rem;
+  }
+}
+
+.headline-medium {
+  font-size: 1.125rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.headline-small {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.headline-compact {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Tag/Label styles */
+.tag-breaking {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--color-brand-red);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tag-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--color-brand-red);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tag-analysis {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--color-brand-primary);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tag-default {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Accent underline - playful touch */
+.accent-underline {
+  position: relative;
+}
+
+.accent-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-brand-primary) 0%, var(--color-brand-accent) 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+
+.accent-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* Gradient text for special highlights */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-brand-primary) 0%, var(--color-brand-blue-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle glow effect */
+.glow-accent {
+  box-shadow: 0 0 20px rgba(0, 102, 204, 0.15);
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Utility colors */
+.bg-bg-primary { background-color: var(--color-bg-primary); }
+.bg-bg-secondary { background-color: var(--color-bg-secondary); }
+.bg-bg-elevated { background-color: var(--color-bg-elevated); }
+.bg-bg-surface { background-color: var(--color-bg-surface); }
+.bg-bg-hover { background-color: var(--color-bg-hover); }
+.bg-bg-dark { background-color: var(--color-bg-dark); }
+.bg-bg-accent { background-color: var(--color-bg-accent); }
+
+.text-text-primary { color: var(--color-text-primary); }
+.text-text-secondary { color: var(--color-text-secondary); }
+.text-text-muted { color: var(--color-text-muted); }
+.text-text-subtle { color: var(--color-text-subtle); }
+.text-text-inverse { color: var(--color-text-inverse); }
+
+.border-border { border-color: var(--color-border); }
+.border-border-light { border-color: var(--color-border-light); }
+.border-border-accent { border-color: var(--color-border-accent); }
+
+.bg-brand-primary { background-color: var(--color-brand-primary); }
+.bg-brand-blue { background-color: var(--color-brand-primary); }
+.bg-brand-blue-light { background-color: var(--color-brand-blue-light); }
+.bg-brand-accent { background-color: var(--color-brand-accent); }
+.bg-brand-gold { background-color: var(--color-brand-gold); }
+.bg-brand-red { background-color: var(--color-brand-red); }
+
+.text-brand-primary { color: var(--color-brand-primary); }
+.text-brand-blue { color: var(--color-brand-primary); }
+.text-brand-accent { color: var(--color-brand-accent); }
+.text-brand-gold { color: var(--color-brand-gold); }
+.text-brand-red { color: var(--color-brand-red); }
+
+.text-market-up { color: var(--color-market-up); }
+.text-market-down { color: var(--color-market-down); }
+.text-market-neutral { color: var(--color-market-neutral); }
+
+.text-live { color: var(--color-live); }
+.bg-live { background-color: var(--color-live); }
+
+/* Hover border accent */
+.hover\:border-brand-primary:hover { border-color: var(--color-brand-primary); }
