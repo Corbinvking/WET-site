@@ -1,9 +1,5 @@
 import Link from 'next/link';
-import type { Market } from '@/data/markets';
-
-interface CatalystCalendarMiniProps {
-  markets: Market[];
-}
+import { markets } from '@/data/markets';
 
 interface Catalyst {
   date: string;
@@ -12,7 +8,7 @@ interface Catalyst {
   marketSlug: string;
 }
 
-export function CatalystCalendarMini({ markets }: CatalystCalendarMiniProps) {
+export function CatalystCalendarMini() {
   // Collect all catalysts from all markets
   const allCatalysts: Catalyst[] = markets
     .flatMap(market => 
@@ -26,6 +22,21 @@ export function CatalystCalendarMini({ markets }: CatalystCalendarMiniProps) {
     .filter(c => new Date(c.date) >= new Date())
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .slice(0, 6);
+
+  if (allCatalysts.length === 0) {
+    return (
+      <div className="bg-bg-surface rounded overflow-hidden border border-border">
+        <div className="bg-bg-elevated px-3 py-2">
+          <h3 className="text-xs font-semibold text-text-primary uppercase tracking-wide">
+            Upcoming Catalysts
+          </h3>
+        </div>
+        <div className="px-3 py-4 text-center text-xs text-text-muted">
+          No upcoming catalysts
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-bg-surface rounded overflow-hidden border border-border">
