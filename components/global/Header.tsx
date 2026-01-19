@@ -5,17 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { categories } from '@/data/categories';
 
-// Main visible nav items
+// Main visible nav items (6 categories + Event Calendar)
 const navItems = [
   { label: 'All Markets', href: '/markets', isHighlight: true },
-  ...categories.slice(0, 7).map(cat => ({
+  ...categories.slice(0, 6).map(cat => ({
     label: cat.name,
     href: `/category/${cat.slug}`,
   })),
+  { label: 'Event Calendar', href: '/calendar', isHighlight: false },
 ];
 
-// Dropdown items for "More"
+// Dropdown items for "More" (includes Sports + other categories)
 const moreItems = [
+  { label: 'Sports', href: '/category/sports' },
   { label: 'Culture', href: '/category/culture' },
   { label: 'Climate & Science', href: '/category/climate' },
   { label: 'Mentions', href: '/category/mentions' },
