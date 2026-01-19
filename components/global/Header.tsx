@@ -34,16 +34,24 @@ export function Header() {
               </svg>
             </button>
             
-            {/* Logo */}
+            {/* Logo + Branding */}
             <Link href="/" className="flex items-center gap-2 group">
               <Image
                 src="/logo.png"
                 alt="W.E.T."
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="object-contain"
                 priority
               />
+              <div className="hidden sm:flex flex-col leading-none">
+                <span className="text-sm font-bold text-text-primary tracking-tight">
+                  W.E.T.
+                </span>
+                <span className="text-[9px] font-medium text-text-muted tracking-wide uppercase">
+                  World Event Trading
+                </span>
+              </div>
             </Link>
           </div>
 
@@ -130,10 +138,18 @@ export function Header() {
               <Image
                 src="/logo.png"
                 alt="W.E.T."
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="object-contain"
               />
+              <div className="flex flex-col leading-none">
+                <span className="text-sm font-bold text-text-primary tracking-tight">
+                  W.E.T.
+                </span>
+                <span className="text-[9px] font-medium text-text-muted tracking-wide uppercase">
+                  World Event Trading
+                </span>
+              </div>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(false)}
