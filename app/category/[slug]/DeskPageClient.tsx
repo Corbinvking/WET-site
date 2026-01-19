@@ -130,17 +130,17 @@ export default function DeskPageClient({ slug, category, deskConfig }: DeskPageC
         if (crossListed.length > 0) {
           return crossListed
             .sort((a, b) => b.combined.combinedVolume - a.combined.combinedVolume)
-            .slice(0, 2);
+            .slice(0, 3);
         }
         // Fallback to highest volume
         return [...deskMarkets]
           .sort((a, b) => b.combined.combinedVolume - a.combined.combinedVolume)
-          .slice(0, 2);
+          .slice(0, 3);
 
       case 'preferVolume':
         return [...deskMarkets]
           .sort((a, b) => b.combined.combinedVolume - a.combined.combinedVolume)
-          .slice(0, 2);
+          .slice(0, 3);
 
       case 'preferMovers':
         return [...deskMarkets]
@@ -149,10 +149,10 @@ export default function DeskPageClient({ slug, category, deskConfig }: DeskPageC
             const bChange = Math.max(...b.listings.map(l => Math.abs(l.change24h || 0)));
             return bChange - aChange;
           })
-          .slice(0, 2);
+          .slice(0, 3);
 
       default:
-        return crossListed.slice(0, 2);
+        return crossListed.slice(0, 3);
     }
   }, [deskMarkets, deskConfig.heroRule]);
 
@@ -259,15 +259,32 @@ export default function DeskPageClient({ slug, category, deskConfig }: DeskPageC
                   </h2>
                 </div>
 
-                <div className="space-y-4">
-                  {heroMarkets.map((market, index) => (
-                    <FeaturedMarketHero
-                      key={market.id}
-                      market={market}
-                      featuredStory={getFeaturedStoryForMarket(market)}
-                      badge={getHeroBadge(market, index)}
-                    />
-                  ))}
+                {/* Lead hero + secondary grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  {/* Lead featured market - large */}
+                  {heroMarkets[0] && (
+                    <div className="lg:col-span-2">
+                      <FeaturedMarketHero
+                        market={heroMarkets[0]}
+                        featuredStory={getFeaturedStoryForMarket(heroMarkets[0])}
+                        badge={getHeroBadge(heroMarkets[0], 0)}
+                        variant="large"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Secondary featured markets - compact stack */}
+                  <div className="space-y-4">
+                    {heroMarkets.slice(1, 3).map((market, index) => (
+                      <FeaturedMarketHero
+                        key={market.id}
+                        market={market}
+                        featuredStory={getFeaturedStoryForMarket(market)}
+                        badge={getHeroBadge(market, index + 1)}
+                        variant="compact"
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
