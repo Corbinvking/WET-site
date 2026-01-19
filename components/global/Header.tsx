@@ -62,7 +62,7 @@ export function Header() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className={`nav-link px-3 py-2 text-sm font-medium ${
+                    className={`nav-link px-2 py-1.5 text-xs font-medium ${
                       'isHighlight' in item && item.isHighlight
                         ? 'text-brand-primary font-semibold'
                         : 'text-text-primary'
@@ -76,15 +76,15 @@ export function Header() {
           </div>
 
           {/* Right: Watch, Listen, Search, Subscribe, Sign In */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {/* Watch with Live Indicator - keep red for live */}
             <Link
               href="/watch"
-              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-text-primary hover:text-brand-primary transition-colors"
+              className="hidden md:flex items-center gap-1 px-2 py-1 text-xs font-medium text-text-primary hover:text-brand-primary transition-colors"
             >
-              <span className="relative flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-brand-red rounded-full animate-pulse" />
-                <span className="text-[10px] font-bold text-brand-red bg-red-50 px-1 rounded">LIVE</span>
+              <span className="relative flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-brand-red rounded-full animate-pulse" />
+                <span className="text-[9px] font-bold text-brand-red bg-red-50 px-0.5 rounded">LIVE</span>
               </span>
               Watch
             </Link>
@@ -92,9 +92,9 @@ export function Header() {
             {/* Listen */}
             <Link
               href="/listen"
-              className="hidden md:flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-text-primary hover:text-brand-primary transition-colors"
+              className="hidden md:flex items-center gap-0.5 px-2 py-1 text-xs font-medium text-text-primary hover:text-brand-primary transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0" />
               </svg>
               Listen
@@ -103,10 +103,10 @@ export function Header() {
             {/* Search */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-text-muted hover:text-brand-primary transition-colors"
+              className="p-1.5 text-text-muted hover:text-brand-primary transition-colors"
               aria-label="Search"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
@@ -114,7 +114,7 @@ export function Header() {
             {/* Subscribe - Blue accent with shimmer */}
             <Link
               href="/subscribe"
-              className="btn-primary hidden sm:block px-3 py-1.5 text-xs font-bold rounded"
+              className="btn-primary hidden sm:block px-2.5 py-1 text-[11px] font-bold rounded"
             >
               Subscribe
             </Link>
@@ -122,7 +122,7 @@ export function Header() {
             {/* Sign In - with border glow on hover */}
             <Link
               href="/signin"
-              className="card-hover hidden sm:block px-3 py-1.5 text-xs font-medium text-text-primary rounded"
+              className="card-hover hidden sm:block px-2 py-1 text-[11px] font-medium text-text-primary rounded"
             >
               Sign In
             </Link>
