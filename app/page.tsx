@@ -1,127 +1,219 @@
 import Link from 'next/link';
-import { stories } from '@/data/stories';
-import { getMarketById } from '@/data/markets';
+import { globalMarkets, getGlobalTopMovers, getGlobalHighestVolume, getCrossListedMarkets, type GlobalMarket } from '@/data/markets';
+import { cn, formatNumber } from '@/lib/utils';
 import {
-  WhatMarketNoticed,
   TopMoversSection,
   ExplainersSection,
-  VideoCarousel,
-  DeskSpotlight,
   MarketsPreview,
   NewsletterCTA,
 } from '@/components/sections';
 
-// Story card components for different sizes
-function HeroStory({ story }: { story: typeof stories[0] }) {
-  const market = story.relatedMarketIds[0] ? getMarketById(story.relatedMarketIds[0]) : null;
+// Helper to get primary listing data
+function getMarketOdds(market: GlobalMarket) {
+  const kListing = market.listings.find(l => l.platform === 'kalshi');
+  const pListing = market.listings.find(l => l.platform === 'polymarket');
+  const isCrossListed = market.combined.platformCount >= 2;
+  const primary = kListing || pListing;
+  
+  return {
+    yes: primary?.yesProbability || 50,
+    no: primary?.noProbability || 50,
+    change: primary?.change24h || 0,
+    kYes: kListing?.yesProbability,
+    pYes: pListing?.yesProbability,
+    isCrossListed,
+    divergence: market.combined.divergence,
+    volume: market.combined.combinedVolume,
+  };
+}
+
+// Hero Market Card - Large featured market
+function HeroMarketCard({ market }: { market: GlobalMarket }) {
+  const odds = getMarketOdds(market);
   
   return (
-    <article className="story-card relative">
-      {/* Large Hero Image */}
-      <div className="story-image image-hover relative aspect-[16/9] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg overflow-hidden mb-3">
+    <article className="relative">
+      {/* Image placeholder */}
+      <div className="relative aspect-[16/9] bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg overflow-hidden mb-3">
         <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+          <span className="text-6xl font-light text-white/20">{odds.yes}%</span>
         </div>
-        {/* Label overlay - now blue for analysis */}
-        <div className="absolute bottom-3 left-3 z-10">
-          <span className="tag-analysis">{story.labels[0] || 'Analysis'}</span>
+        
+        {/* Badges */}
+        <div className="absolute top-3 left-3 flex items-center gap-2">
+          <span className="px-2 py-0.5 bg-brand-primary text-white text-[10px] font-bold uppercase rounded">
+            {market.category}
+          </span>
+          {odds.isCrossListed && (
+            <span className="px-2 py-0.5 bg-white/20 text-white text-[10px] font-medium rounded">
+              Cross-Listed
+            </span>
+          )}
+        </div>
+
+        {/* Price overlay */}
+        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+          <span className="px-2 py-1 bg-black/60 backdrop-blur-sm text-white text-sm font-semibold rounded">
+            {odds.yes}% YES
+          </span>
+          {odds.change !== 0 && (
+            <span className={cn(
+              'px-2 py-1 rounded text-sm font-medium',
+              odds.change >= 0 ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'
+            )}>
+              {odds.change >= 0 ? '↑' : '↓'}{Math.abs(odds.change).toFixed(1)}%
+            </span>
+          )}
         </div>
       </div>
       
       {/* Headline */}
-      <Link href={`/story/${story.slug}`} className="group block">
-        <h2 className="headline-hero mb-2 group-hover:text-brand-primary">
-          {story.title}
+      <Link href={`/market/${market.slug}`} className="group block">
+        <h2 className="text-xl md:text-2xl font-bold text-text-primary leading-tight mb-2 group-hover:text-brand-primary transition-colors">
+          {market.canonicalQuestion}
         </h2>
       </Link>
       
-      {/* Summary */}
-      <p className="text-sm text-text-secondary leading-relaxed mb-3">
-        {story.summary}
-      </p>
-      
-      {/* Market Context - with hover effects */}
-      {market && (
-        <div className="flex items-center gap-3 text-xs border-t border-border pt-3">
-          <Link href={`/market/${market.slug}`} className="text-text-muted font-medium hover:text-brand-primary transition-colors">
-            {market.title}
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="market-pill px-2 py-1 bg-blue-50 text-brand-primary rounded font-semibold">
-              K: {Math.round((market.platforms.kalshi?.yesPrice || 0) * 100)}%
-            </span>
-            <span className="market-pill px-2 py-1 bg-blue-50 text-brand-primary rounded font-semibold">
-              P: {Math.round((market.platforms.polymarket?.yesPrice || 0) * 100)}%
-            </span>
-            <span className={`font-bold flex items-center gap-0.5 ${market.change24h >= 0 ? 'text-market-up' : 'text-market-down'}`}>
-              {market.change24h >= 0 ? (
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5H7z"/></svg>
-              ) : (
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5H7z"/></svg>
-              )}
-              {Math.abs(market.change24h).toFixed(1)}%
-            </span>
-          </div>
-        </div>
-      )}
+      {/* Market context */}
+      <div className="flex items-center gap-3 text-xs text-text-muted">
+        {odds.isCrossListed && odds.kYes && odds.pYes && (
+          <>
+            <span>K: {odds.kYes}%</span>
+            <span className="text-slate-300">|</span>
+            <span>P: {odds.pYes}%</span>
+            {odds.divergence && odds.divergence > 0 && (
+              <>
+                <span className="text-slate-300">|</span>
+                <span className="text-brand-primary font-medium">Δ{odds.divergence}pts</span>
+              </>
+            )}
+          </>
+        )}
+        <span className="text-slate-300">•</span>
+        <span>${formatNumber(odds.volume)} vol</span>
+        {market.nextCatalyst && (
+          <>
+            <span className="text-slate-300">•</span>
+            <span>Next: {market.nextCatalyst.event}</span>
+          </>
+        )}
+      </div>
     </article>
   );
 }
 
-function LargeStoryCard({ story }: { story: typeof stories[0] }) {
+// Large Market Card with image
+function LargeMarketCard({ market }: { market: GlobalMarket }) {
+  const odds = getMarketOdds(market);
+  
   return (
-    <article className="story-card group">
-      <div className="story-image thumb-hover relative aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg overflow-hidden mb-2">
+    <article className="group">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-200 to-slate-300 rounded-lg overflow-hidden mb-2">
         <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+          <span className="text-4xl font-light text-slate-400">{odds.yes}%</span>
         </div>
+        <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[9px] font-medium uppercase rounded">
+          {market.category}
+        </span>
+        {odds.change !== 0 && (
+          <span className={cn(
+            'absolute bottom-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-medium',
+            odds.change >= 0 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+          )}>
+            {odds.change >= 0 ? '↑' : '↓'}{Math.abs(odds.change).toFixed(1)}%
+          </span>
+        )}
       </div>
-      <Link href={`/story/${story.slug}`}>
-        <h3 className="headline-large group-hover:text-brand-primary">
-          {story.title}
+      <Link href={`/market/${market.slug}`}>
+        <h3 className="text-sm font-semibold text-text-primary leading-snug group-hover:text-brand-primary transition-colors line-clamp-3">
+          {market.canonicalQuestion}
         </h3>
       </Link>
     </article>
   );
 }
 
-function MediumStoryCard({ story }: { story: typeof stories[0] }) {
+// Medium Market Card - text focused
+function MediumMarketCard({ market }: { market: GlobalMarket }) {
+  const odds = getMarketOdds(market);
+  
   return (
     <article className="group border-b border-border pb-3 mb-3 last:border-0 last:pb-0 last:mb-0">
-      <Link href={`/story/${story.slug}`} className="block">
-        <h3 className="headline-medium group-hover:text-brand-primary mb-1">
-          {story.title}
-        </h3>
+      <Link href={`/market/${market.slug}`} className="block">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-sm font-medium text-text-primary group-hover:text-brand-primary transition-colors leading-snug flex-1">
+            {market.title}
+          </h3>
+          <div className="flex-shrink-0 text-right">
+            <div className="text-sm font-bold text-text-primary">{odds.yes}%</div>
+            {odds.change !== 0 && (
+              <div className={cn(
+                'text-[10px] font-medium',
+                odds.change >= 0 ? 'text-green-600' : 'text-red-600'
+              )}>
+                {odds.change >= 0 ? '↑' : '↓'}{Math.abs(odds.change).toFixed(1)}%
+              </div>
+            )}
+          </div>
+        </div>
       </Link>
-      <p className="text-xs text-text-muted line-clamp-2">
-        {story.summary}
-      </p>
     </article>
   );
 }
 
-function StoryWithThumb({ story }: { story: typeof stories[0] }) {
+// Compact Market Card with thumbnail
+function CompactMarketCard({ market }: { market: GlobalMarket }) {
+  const odds = getMarketOdds(market);
+  
   return (
     <article className="group flex gap-3 mb-4 last:mb-0">
-      {/* Thumbnail */}
-      <div className="thumb-hover flex-shrink-0 w-24 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded overflow-hidden">
-        <div className="w-full h-full flex items-center justify-center">
-          <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
+      <div className="flex-shrink-0 w-20 h-14 bg-gradient-to-br from-slate-200 to-slate-300 rounded overflow-hidden flex items-center justify-center">
+        <span className="text-lg font-semibold text-slate-400">{odds.yes}%</span>
       </div>
-      <div className="flex-1">
-        <Link href={`/story/${story.slug}`}>
-          <h4 className="headline-compact group-hover:text-brand-primary line-clamp-3">
-            {story.title}
+      <div className="flex-1 min-w-0">
+        <Link href={`/market/${market.slug}`}>
+          <h4 className="text-xs font-medium text-text-primary group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
+            {market.title}
           </h4>
         </Link>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[10px] text-text-muted capitalize">{market.category}</span>
+          {odds.change !== 0 && (
+            <span className={cn(
+              'text-[10px] font-medium',
+              odds.change >= 0 ? 'text-green-600' : 'text-red-600'
+            )}>
+              {odds.change >= 0 ? '↑' : '↓'}{Math.abs(odds.change).toFixed(1)}%
+            </span>
+          )}
+        </div>
       </div>
+    </article>
+  );
+}
+
+// Small Market Row for sub-hero area
+function SmallMarketCard({ market }: { market: GlobalMarket }) {
+  const odds = getMarketOdds(market);
+  
+  return (
+    <article className="group">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-200 to-slate-300 rounded overflow-hidden mb-2">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-2xl font-light text-slate-400">{odds.yes}%</span>
+        </div>
+        {market.nextCatalyst && (
+          <div className="absolute top-1.5 left-1.5 flex items-center gap-1 px-1.5 py-0.5 bg-brand-primary text-white text-[8px] font-bold uppercase rounded">
+            <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
+            {market.nextCatalyst.event.slice(0, 15)}...
+          </div>
+        )}
+      </div>
+      <Link href={`/market/${market.slug}`}>
+        <h4 className="text-xs font-semibold text-text-primary group-hover:text-brand-primary transition-colors line-clamp-2 leading-snug">
+          {market.title}
+        </h4>
+      </Link>
     </article>
   );
 }
@@ -130,25 +222,28 @@ function VideoPlaceholder() {
   return (
     <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900 rounded-lg overflow-hidden mb-3 group cursor-pointer">
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="play-button w-14 h-14 bg-brand-primary/90 rounded-full flex items-center justify-center shadow-lg">
-          <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+        <div className="w-12 h-12 bg-brand-primary/90 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+          <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />
           </svg>
         </div>
       </div>
-      {/* Subtle blue gradient overlay on hover */}
-      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 }
 
 export default function Home() {
-  // Organize stories for different sections
-  const heroStory = stories[0];
-  const leftColumnStories = stories.slice(1, 4);
-  const subHeroStories = stories.slice(4, 7);
-  const rightRailStories = stories.slice(7, 12);
-
+  // Sort markets by volume and activity for homepage
+  const topByVolume = getGlobalHighestVolume(15);
+  const topMovers = getGlobalTopMovers(10);
+  const crossListed = getCrossListedMarkets();
+  
+  // Organize markets for layout
+  const heroMarket = topByVolume[0];
+  const leftColumnMarkets = topMovers.slice(0, 4);
+  const subHeroMarkets = crossListed.slice(0, 3);
+  const rightRailMarkets = topByVolume.slice(1, 7);
+  
   return (
     <div className="bg-white min-h-screen">
       {/* HERO SECTION - Above the fold */}
@@ -156,81 +251,82 @@ export default function Home() {
         {/* Main Grid - CNN Style 3 Column Layout */}
         <div className="grid grid-cols-12 gap-5">
           
-          {/* LEFT COLUMN - Large stories with images */}
+          {/* LEFT COLUMN - Top Movers */}
           <div className="col-span-12 lg:col-span-3 space-y-4">
-            {leftColumnStories.map((story, index) => (
-              <div key={story.slug}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wide">Top Movers</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+            {leftColumnMarkets.map((market, index) => (
+              <div key={market.id}>
                 {index === 0 ? (
-                  <LargeStoryCard story={story} />
+                  <LargeMarketCard market={market} />
                 ) : (
-                  <MediumStoryCard story={story} />
+                  <MediumMarketCard market={market} />
                 )}
               </div>
             ))}
           </div>
 
-          {/* CENTER COLUMN - Hero Story */}
+          {/* CENTER COLUMN - Hero Market */}
           <div className="col-span-12 lg:col-span-6 order-first lg:order-none">
-            <HeroStory story={heroStory} />
+            <HeroMarketCard market={heroMarket} />
             
-            {/* Sub-hero stories in a row */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
-              {subHeroStories.map((story) => (
-                <article key={story.slug} className="story-card group">
-                  <div className="thumb-hover relative aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded overflow-hidden mb-2">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    {/* Live indicator - keep red for urgency */}
-                    {story.labels.includes('Live Updates') && (
-                      <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 bg-brand-red text-white text-[9px] font-bold uppercase rounded-sm z-10">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                        Live
-                      </div>
-                    )}
-                  </div>
-                  <Link href={`/story/${story.slug}`}>
-                    <h4 className="text-xs font-semibold text-text-primary group-hover:text-brand-primary transition-colors line-clamp-3 leading-snug">
-                      {story.title}
-                    </h4>
-                  </Link>
-                </article>
-              ))}
+            {/* Sub-hero markets - Cross-listed spotlight */}
+            <div className="mt-6 pt-6 border-t border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[10px] font-bold text-brand-primary uppercase tracking-wide">Cross-Listed Markets</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {subHeroMarkets.map((market) => (
+                  <SmallMarketCard key={market.id} market={market} />
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN - Catch up rail */}
+          {/* RIGHT COLUMN - Highest Volume */}
           <div className="col-span-12 lg:col-span-3">
-            {/* Video/Watch Section */}
+            {/* Video placeholder */}
             <div className="mb-6">
               <VideoPlaceholder />
               <h3 className="text-sm font-bold text-text-primary mb-1">
-                Catch up on today&apos;s headlines
+                Today&apos;s Market Highlights
               </h3>
+              <p className="text-xs text-text-muted">
+                Quick overview of the day&apos;s biggest moves and opportunities
+              </p>
             </div>
 
-            {/* Story list with thumbnails */}
-            <div className="space-y-0">
-              {rightRailStories.map((story) => (
-                <StoryWithThumb key={story.slug} story={story} />
+            {/* Highest Volume Markets */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wide">Highest Volume</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+              {rightRailMarkets.map((market) => (
+                <CompactMarketCard key={market.id} market={market} />
               ))}
             </div>
 
-            {/* Podcast/Audio Section - with subtle gold accent */}
-            <div className="mt-6 pt-6 border-t border-border">
+            {/* Expiring Soon */}
+            <div className="pt-4 border-t border-border">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-[10px] font-bold text-brand-gold uppercase tracking-wide flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V23h2v-2.06A9 9 0 0 0 21 12v-2h-2z"/>
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Podcast
+                  Expiring Soon
                 </span>
               </div>
-              {stories.slice(5, 7).map((story) => (
-                <StoryWithThumb key={story.slug} story={story} />
-              ))}
+              {globalMarkets
+                .filter(m => m.expiryDate)
+                .sort((a, b) => new Date(a.expiryDate!).getTime() - new Date(b.expiryDate!).getTime())
+                .slice(0, 3)
+                .map((market) => (
+                  <CompactMarketCard key={market.id} market={market} />
+                ))}
             </div>
           </div>
         </div>
@@ -238,27 +334,61 @@ export default function Home() {
 
       {/* BELOW THE FOLD SECTIONS */}
       <div className="container-wet">
-        {/* Section 1: What the Market Noticed */}
-        <WhatMarketNoticed />
+        {/* Section: Category Highlights */}
+        <section className="py-8 border-t border-border">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 bg-brand-primary rounded-full" />
+              <h2 className="text-lg font-bold text-text-primary">Markets by Category</h2>
+            </div>
+            <Link href="/markets" className="text-xs text-brand-primary font-medium hover:underline">
+              View All Markets →
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {['politics', 'economy', 'crypto', 'tech', 'sports', 'world'].map((category) => {
+              const categoryMarkets = globalMarkets.filter(m => m.category.toLowerCase() === category);
+              const topMarket = categoryMarkets.sort((a, b) => b.combined.combinedVolume - a.combined.combinedVolume)[0];
+              
+              if (!topMarket) return null;
+              
+              const odds = getMarketOdds(topMarket);
+              
+              return (
+                <Link 
+                  key={category}
+                  href={`/category/${category}`}
+                  className="group p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <div className="text-[10px] font-bold text-text-muted uppercase tracking-wide mb-2">
+                    {category}
+                  </div>
+                  <div className="text-2xl font-light text-text-primary mb-1">
+                    {odds.yes}%
+                  </div>
+                  <div className="text-xs text-text-secondary line-clamp-2 group-hover:text-brand-primary transition-colors">
+                    {topMarket.title}
+                  </div>
+                  <div className="text-[10px] text-text-muted mt-2">
+                    {categoryMarkets.length} markets
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
 
-        {/* Section 2: Top Movers Today */}
+        {/* Section: Top Movers Today */}
         <TopMoversSection />
 
-        {/* Section 3: Market Explainers */}
+        {/* Section: Market Explainers */}
         <ExplainersSection />
 
-        {/* Section 4: Video Carousel */}
-        <div className="relative">
-          <VideoCarousel />
-        </div>
-
-        {/* Section 5: Desk Spotlight */}
-        <DeskSpotlight categorySlug="politics" />
-
-        {/* Section 6: Markets Directory Preview */}
+        {/* Section: Markets Directory Preview */}
         <MarketsPreview />
 
-        {/* Section 7: Newsletter CTA */}
+        {/* Section: Newsletter CTA */}
         <NewsletterCTA />
       </div>
     </div>
