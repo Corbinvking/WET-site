@@ -1,37 +1,115 @@
+'use client';
+
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { markets, getTopMovers, getHighestVolume } from '@/data/markets';
+import { 
+  globalMarkets, 
+  getCrossListedMarkets, 
+  getPlatformExclusiveMarkets,
+  getMarketsByPlatform,
+  getGlobalTopMovers, 
+  getGlobalHighestVolume,
+  getGlobalBiggestDivergence,
+  getMarketStats,
+  type GlobalMarket,
+  type Platform,
+} from '@/data/markets';
 import { categories } from '@/data/categories';
 import { formatNumber } from '@/lib/utils';
-import { MarketCard, CatalystCalendarMini } from '@/components/market';
-
-export const metadata = {
-  title: 'Markets Directory | W.E.T.',
-  description: 'Browse all prediction markets across politics, economy, crypto, sports, and more.',
-};
-
-// Calculate divergence between platforms
-function getDivergentMarkets(limit: number = 5) {
-  return markets
-    .filter(m => m.platforms.kalshi && m.platforms.polymarket)
-    .map(m => ({
-      ...m,
-      divergence: Math.abs(
-        (m.platforms.kalshi?.yesPrice || 0) - (m.platforms.polymarket?.yesPrice || 0)
-      ) * 100
-    }))
-    .sort((a, b) => b.divergence - a.divergence)
-    .slice(0, limit);
-}
+import {
+  GlobalMarketCard,
+  CatalystCalendarMini,
+  PlatformOverviewPanel,
+  MarketSortDropdown,
+  sortGlobalMarkets,
+  EmptyMarketState,
+  PlatformPresenceFilter,
+  PlatformSelectorChips,
+  ExclusivitySubFilter,
+  ViewModeToggle,
+  type PlatformPresence,
+  type ExclusivityOption,
+  type ViewMode,
+  type SortOption,
+} from '@/components/market';
 
 export default function MarketsPage() {
-  const allMarkets = markets;
-  const topMovers = getTopMovers(5);
-  const highestVolume = getHighestVolume(5);
-  const divergentMarkets = getDivergentMarkets(5);
-  
-  // Featured market (biggest mover or highest volume)
-  const featuredMarket = topMovers[0];
-  const remainingMarkets = allMarkets.filter(m => m.id !== featuredMarket?.id);
+  // Filter state
+  const [platformPresence, setPlatformPresence] = useState<PlatformPresence>('all');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['kalshi', 'polymarket']);
+  const [exclusivityFilter, setExclusivityFilter] = useState<ExclusivityOption>('any');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortOption, setSortOption] = useState<SortOption>('relevance');
+  const [viewMode, setViewMode] = useState<ViewMode>('global');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Get market stats
+  const stats = getMarketStats();
+
+  // Filter markets based on current state
+  const filteredMarkets = useMemo(() => {
+    let result: GlobalMarket[] = [...globalMarkets];
+
+    // Platform presence filter
+    if (platformPresence === 'cross-listed') {
+      result = getCrossListedMarkets();
+    } else if (platformPresence === 'exclusive') {
+      if (exclusivityFilter === 'kalshi') {
+        result = getPlatformExclusiveMarkets('kalshi');
+      } else if (exclusivityFilter === 'polymarket') {
+        result = getPlatformExclusiveMarkets('polymarket');
+      } else {
+        result = getPlatformExclusiveMarkets();
+      }
+    }
+
+    // Platform selector filter (for "all" presence mode)
+    if (platformPresence === 'all') {
+      if (selectedPlatforms.length === 1) {
+        result = getMarketsByPlatform(selectedPlatforms[0]);
+      }
+    }
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      result = result.filter(m => m.category.toLowerCase() === selectedCategory.toLowerCase());
+    }
+
+    // Search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(m => 
+        m.canonicalQuestion.toLowerCase().includes(term) ||
+        m.title.toLowerCase().includes(term) ||
+        m.category.toLowerCase().includes(term) ||
+        m.tags.some(t => t.toLowerCase().includes(term))
+      );
+    }
+
+    // Sort
+    result = sortGlobalMarkets(result, sortOption);
+
+    return result;
+  }, [platformPresence, selectedPlatforms, exclusivityFilter, selectedCategory, searchTerm, sortOption]);
+
+  // Featured market (top mover)
+  const featuredMarket = getGlobalTopMovers(1)[0];
+  const displayMarkets = filteredMarkets.filter(m => m.id !== featuredMarket?.id);
+
+  // Lists for sidebar (respect filters)
+  const topMovers = getGlobalTopMovers(5);
+  const highestVolume = getGlobalHighestVolume(5);
+  const biggestDivergence = getGlobalBiggestDivergence(5);
+
+  // Reset all filters
+  const handleClearFilters = () => {
+    setPlatformPresence('all');
+    setSelectedPlatforms(['kalshi', 'polymarket']);
+    setExclusivityFilter('any');
+    setSelectedCategory('all');
+    setSortOption('relevance');
+    setSearchTerm('');
+  };
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -42,13 +120,13 @@ export default function MarketsPage() {
             Markets Directory
           </h1>
           <p className="text-sm text-text-muted">
-            Browse prediction markets across Kalshi and Polymarket. Compare prices, track movers, and find opportunities.
+            Browse and compare prediction markets across platforms. Find cross-listed opportunities, track movers, and discover divergence.
           </p>
         </div>
 
-        {/* Search Bar (UI only) */}
+        {/* Search Bar */}
         <div className="mb-4">
-          <div className="relative max-w-lg">
+          <div className="relative max-w-xl">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted"
               fill="none"
@@ -64,42 +142,86 @@ export default function MarketsPage() {
             </svg>
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search markets by keyword, event, or question..."
               className="w-full pl-9 pr-4 py-2.5 bg-bg-surface border border-border rounded-lg text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all"
             />
           </div>
         </div>
 
-        {/* Filter Chips */}
-        <div className="flex flex-wrap gap-1.5 mb-6">
-          <button className="px-3 py-1.5 bg-brand-primary text-white text-xs font-medium rounded-full">
+        {/* Filter Row 1: Platform Presence + Platform Selector */}
+        <div className="flex flex-wrap items-center gap-3 mb-3">
+          <PlatformPresenceFilter 
+            value={platformPresence} 
+            onChange={setPlatformPresence} 
+          />
+          
+          <div className="w-px h-6 bg-border hidden sm:block" />
+          
+          <PlatformSelectorChips
+            selected={selectedPlatforms}
+            onChange={setSelectedPlatforms}
+          />
+
+          {/* Exclusivity sub-filter (shown when exclusive is selected) */}
+          {platformPresence === 'exclusive' && (
+            <>
+              <div className="w-px h-6 bg-border hidden sm:block" />
+              <ExclusivitySubFilter
+                value={exclusivityFilter}
+                onChange={setExclusivityFilter}
+              />
+            </>
+          )}
+        </div>
+
+        {/* Filter Row 2: Category Chips */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+              selectedCategory === 'all'
+                ? 'bg-brand-primary text-white'
+                : 'bg-bg-surface hover:bg-bg-hover text-text-muted border border-border'
+            }`}
+          >
             All Markets
           </button>
-          {categories.slice(0, 6).map((category) => (
+          {categories.map((category) => (
             <button
               key={category.id}
-              className="px-3 py-1.5 bg-bg-surface hover:bg-bg-hover text-text-muted text-xs font-medium rounded-full border border-border transition-colors"
+              onClick={() => setSelectedCategory(category.slug)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                selectedCategory === category.slug
+                  ? 'bg-brand-primary text-white'
+                  : 'bg-bg-surface hover:bg-bg-hover text-text-muted border border-border'
+              }`}
             >
               {category.name}
             </button>
           ))}
-          <div className="w-px bg-border mx-1 my-1" />
-          <button className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200 transition-colors">
-            🔥 Top Movers
-          </button>
-          <button className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-medium rounded-full border border-amber-200 transition-colors">
-            📊 Divergence
-          </button>
-          <button className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded-full border border-blue-200 transition-colors">
-            💰 Volume
-          </button>
+        </div>
+
+        {/* Filter Row 3: Sort + View Mode */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <MarketSortDropdown
+            value={sortOption}
+            onChange={setSortOption}
+            selectedPlatforms={selectedPlatforms}
+          />
+
+          <ViewModeToggle
+            value={viewMode}
+            onChange={setViewMode}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Main Market List */}
           <div className="lg:col-span-8">
             {/* Featured Market (Lead) */}
-            {featuredMarket && (
+            {featuredMarket && platformPresence !== 'exclusive' && selectedCategory === 'all' && !searchTerm && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-0.5 h-4 bg-brand-primary rounded-full" />
@@ -115,51 +237,74 @@ export default function MarketsPage() {
                   href={`/market/${featuredMarket.slug}`}
                   className="block p-4 bg-gradient-to-br from-blue-50 to-slate-50 rounded-lg border border-blue-100 group hover:border-brand-primary transition-colors"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="flex-1">
-                      <span className="text-[10px] font-medium text-brand-primary uppercase tracking-wide">
-                        {featuredMarket.category}
-                      </span>
-                      <h3 className="text-lg font-bold text-text-primary group-hover:text-brand-primary transition-colors mt-1">
-                        {featuredMarket.question}
+                      {/* Category + Coverage */}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-medium text-brand-primary uppercase tracking-wide">
+                          {featuredMarket.category}
+                        </span>
+                        {featuredMarket.combined.platformCount >= 2 && (
+                          <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold uppercase rounded">
+                            Cross-listed
+                          </span>
+                        )}
+                      </div>
+                      
+                      <h3 className="text-lg font-bold text-text-primary group-hover:text-brand-primary transition-colors">
+                        {featuredMarket.canonicalQuestion}
                       </h3>
+                      
                       <p className="text-sm text-text-muted mt-1">
-                        Expires: {new Date(featuredMarket.expirationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        Expires: {featuredMarket.expiryDate ? new Date(featuredMarket.expiryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD'}
                       </p>
                     </div>
                     
                     <div className="flex items-center gap-6">
                       {/* Kalshi Price */}
-                      <div className="text-center">
-                        <span className="text-[10px] font-medium text-text-muted block mb-1">Kalshi</span>
-                        <span className="text-2xl font-bold text-brand-primary">
-                          {Math.round((featuredMarket.platforms.kalshi?.yesPrice || 0) * 100)}%
-                        </span>
-                      </div>
+                      {featuredMarket.listings.find(l => l.platform === 'kalshi') && (
+                        <div className="text-center">
+                          <span className="text-[10px] font-medium text-blue-600 block mb-1">Kalshi</span>
+                          <span className="text-2xl font-bold text-brand-primary">
+                            {featuredMarket.listings.find(l => l.platform === 'kalshi')?.yesProbability}%
+                          </span>
+                        </div>
+                      )}
                       
                       {/* Polymarket Price */}
-                      <div className="text-center">
-                        <span className="text-[10px] font-medium text-text-muted block mb-1">Polymarket</span>
-                        <span className="text-2xl font-bold text-brand-primary">
-                          {Math.round((featuredMarket.platforms.polymarket?.yesPrice || 0) * 100)}%
-                        </span>
-                      </div>
+                      {featuredMarket.listings.find(l => l.platform === 'polymarket') && (
+                        <div className="text-center">
+                          <span className="text-[10px] font-medium text-purple-600 block mb-1">Polymarket</span>
+                          <span className="text-2xl font-bold text-brand-primary">
+                            {featuredMarket.listings.find(l => l.platform === 'polymarket')?.yesProbability}%
+                          </span>
+                        </div>
+                      )}
                       
                       {/* 24h Change */}
                       <div className="text-center">
                         <span className="text-[10px] font-medium text-text-muted block mb-1">24h</span>
-                        <span className={`text-2xl font-bold ${featuredMarket.change24h >= 0 ? 'text-market-up' : 'text-market-down'}`}>
-                          {featuredMarket.change24h >= 0 ? '▲' : '▼'}{Math.abs(featuredMarket.change24h).toFixed(1)}%
+                        <span className={`text-2xl font-bold ${
+                          (featuredMarket.listings[0]?.change24h || 0) >= 0 ? 'text-market-up' : 'text-market-down'
+                        }`}>
+                          {(featuredMarket.listings[0]?.change24h || 0) >= 0 ? '▲' : '▼'}
+                          {Math.abs(featuredMarket.listings[0]?.change24h || 0).toFixed(1)}%
                         </span>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Volume bar */}
+                  {/* Meta bar */}
                   <div className="mt-4 flex items-center gap-4 text-xs text-text-muted">
-                    <span>Volume: ${formatNumber(featuredMarket.totalVolume)}</span>
+                    <span>Volume: ${formatNumber(featuredMarket.combined.combinedVolume)}</span>
                     <span>•</span>
-                    <span>Liquidity: ${formatNumber((featuredMarket.platforms.kalshi?.liquidity || 0) + (featuredMarket.platforms.polymarket?.liquidity || 0))}</span>
+                    <span>Liquidity: ${formatNumber(featuredMarket.combined.combinedLiquidity)}</span>
+                    {featuredMarket.combined.divergence !== null && featuredMarket.combined.divergence > 0 && (
+                      <>
+                        <span>•</span>
+                        <span className="text-amber-600 font-medium">Δ {featuredMarket.combined.divergence} pts</span>
+                      </>
+                    )}
                   </div>
                 </Link>
               </div>
@@ -168,60 +313,46 @@ export default function MarketsPage() {
             {/* Results Header */}
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs text-text-muted">
-                {remainingMarkets.length} markets
+                {displayMarkets.length} market{displayMarkets.length !== 1 ? 's' : ''} found
               </span>
-              <select className="px-3 py-1.5 bg-bg-surface border border-border rounded-lg text-xs text-text-muted focus:outline-none focus:border-brand-primary">
-                <option>Sort by: Relevance</option>
-                <option>Sort by: Volume (High to Low)</option>
-                <option>Sort by: 24h Change</option>
-                <option>Sort by: Expiration (Soonest)</option>
-                <option>Sort by: Divergence</option>
-              </select>
+              {(platformPresence !== 'all' || selectedCategory !== 'all' || searchTerm) && (
+                <button
+                  onClick={handleClearFilters}
+                  className="text-xs text-brand-primary hover:underline"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
 
-            {/* Market Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {remainingMarkets.map((market) => (
-                <MarketCard 
-                  key={market.id} 
-                  market={market} 
-                  showVolume={true}
-                  showCatalysts={true}
-                />
-              ))}
-            </div>
+            {/* Market Grid or Empty State */}
+            {displayMarkets.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {displayMarkets.map((market) => (
+                  <GlobalMarketCard
+                    key={market.id}
+                    market={market}
+                    selectedPlatforms={selectedPlatforms}
+                    showVolume={true}
+                    showCatalyst={true}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyMarketState
+                searchTerm={searchTerm}
+                onClearFilters={handleClearFilters}
+              />
+            )}
           </div>
 
           {/* Right Sidebar */}
           <aside className="lg:col-span-4 space-y-5">
-            {/* Quick Stats */}
-            <div className="p-4 bg-bg-surface rounded-lg border border-border">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wide mb-3">
-                Platform Overview
-              </h3>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-text-muted">Total Markets</span>
-                  <span className="text-sm font-semibold text-text-primary">{allMarkets.length}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-text-muted">Combined Volume</span>
-                  <span className="text-sm font-semibold text-text-primary">
-                    ${formatNumber(allMarkets.reduce((sum, m) => sum + m.totalVolume, 0))}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-text-muted">Active Categories</span>
-                  <span className="text-sm font-semibold text-text-primary">{categories.length}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-text-muted">Avg. Divergence</span>
-                  <span className="text-sm font-semibold text-amber-600">
-                    {(divergentMarkets.reduce((sum, m) => sum + m.divergence, 0) / divergentMarkets.length).toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Platform Overview */}
+            <PlatformOverviewPanel
+              stats={stats}
+              selectedPlatforms={selectedPlatforms}
+            />
 
             {/* Top Movers */}
             <div className="bg-bg-surface rounded-lg border border-border overflow-hidden">
@@ -231,22 +362,27 @@ export default function MarketsPage() {
                 </h3>
               </div>
               <div className="divide-y divide-border">
-                {topMovers.map((market) => (
-                  <Link
-                    key={market.id}
-                    href={`/market/${market.slug}`}
-                    className="block px-4 py-3 hover:bg-bg-hover transition-colors group"
-                  >
-                    <div className="flex justify-between items-start gap-2">
-                      <span className="text-xs text-text-secondary group-hover:text-brand-primary transition-colors line-clamp-2">{market.title}</span>
-                      <span className={`text-xs font-bold whitespace-nowrap ${
-                        market.change24h >= 0 ? 'text-market-up' : 'text-market-down'
-                      }`}>
-                        {market.change24h >= 0 ? '▲' : '▼'} {Math.abs(market.change24h).toFixed(1)}%
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                {topMovers.map((market) => {
+                  const change = market.listings[0]?.change24h || 0;
+                  return (
+                    <Link
+                      key={market.id}
+                      href={`/market/${market.slug}`}
+                      className="block px-4 py-3 hover:bg-bg-hover transition-colors group"
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="text-xs text-text-secondary group-hover:text-brand-primary transition-colors line-clamp-2">
+                          {market.title}
+                        </span>
+                        <span className={`text-xs font-bold whitespace-nowrap ${
+                          change >= 0 ? 'text-market-up' : 'text-market-down'
+                        }`}>
+                          {change >= 0 ? '▲' : '▼'} {Math.abs(change).toFixed(1)}%
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -259,25 +395,31 @@ export default function MarketsPage() {
                 <p className="text-[10px] text-amber-600 mt-0.5">Price gaps between Kalshi & Polymarket</p>
               </div>
               <div className="divide-y divide-border">
-                {divergentMarkets.map((market) => (
-                  <Link
-                    key={market.id}
-                    href={`/market/${market.slug}`}
-                    className="block px-4 py-3 hover:bg-bg-hover transition-colors group"
-                  >
-                    <div className="flex justify-between items-start gap-2 mb-1">
-                      <span className="text-xs text-text-secondary group-hover:text-brand-primary transition-colors line-clamp-1">{market.title}</span>
-                      <span className="text-xs font-bold text-amber-600 whitespace-nowrap">
-                        Δ{market.divergence.toFixed(0)}%
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] text-text-muted">
-                      <span>K: {Math.round((market.platforms.kalshi?.yesPrice || 0) * 100)}%</span>
-                      <span>vs</span>
-                      <span>P: {Math.round((market.platforms.polymarket?.yesPrice || 0) * 100)}%</span>
-                    </div>
-                  </Link>
-                ))}
+                {biggestDivergence.map((market) => {
+                  const kalshi = market.listings.find(l => l.platform === 'kalshi');
+                  const poly = market.listings.find(l => l.platform === 'polymarket');
+                  return (
+                    <Link
+                      key={market.id}
+                      href={`/market/${market.slug}`}
+                      className="block px-4 py-3 hover:bg-bg-hover transition-colors group"
+                    >
+                      <div className="flex justify-between items-start gap-2 mb-1">
+                        <span className="text-xs text-text-secondary group-hover:text-brand-primary transition-colors line-clamp-1">
+                          {market.title}
+                        </span>
+                        <span className="text-xs font-bold text-amber-600 whitespace-nowrap">
+                          Δ{market.combined.divergence}%
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] text-text-muted">
+                        <span>K: {kalshi?.yesProbability}%</span>
+                        <span>vs</span>
+                        <span>P: {poly?.yesProbability}%</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -296,9 +438,11 @@ export default function MarketsPage() {
                     className="block px-4 py-3 hover:bg-bg-hover transition-colors group"
                   >
                     <div className="flex justify-between items-start gap-2">
-                      <span className="text-xs text-text-secondary group-hover:text-brand-primary transition-colors line-clamp-1">{market.title}</span>
+                      <span className="text-xs text-text-secondary group-hover:text-brand-primary transition-colors line-clamp-1">
+                        {market.title}
+                      </span>
                       <span className="text-xs font-semibold text-text-muted whitespace-nowrap">
-                        ${formatNumber(market.totalVolume)}
+                        ${formatNumber(market.combined.combinedVolume)}
                       </span>
                     </div>
                   </Link>

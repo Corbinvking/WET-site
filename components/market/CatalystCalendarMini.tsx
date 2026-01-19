@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { markets } from '@/data/markets';
+import { globalMarkets } from '@/data/markets';
 
 interface Catalyst {
   date: string;
@@ -10,7 +10,7 @@ interface Catalyst {
 
 export function CatalystCalendarMini() {
   // Collect all catalysts from all markets
-  const allCatalysts: Catalyst[] = markets
+  const allCatalysts: Catalyst[] = globalMarkets
     .flatMap(market => 
       market.catalysts.map(catalyst => ({
         date: catalyst.date,
