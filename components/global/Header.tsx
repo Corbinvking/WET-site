@@ -1,22 +1,46 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { categories } from '@/data/categories';
 
+// Main visible nav items
 const navItems = [
   { label: 'All Markets', href: '/markets', isHighlight: true },
   ...categories.slice(0, 7).map(cat => ({
     label: cat.name,
     href: `/category/${cat.slug}`,
   })),
-  { label: 'More', href: '#', hasDropdown: true },
+];
+
+// Dropdown items for "More"
+const moreItems = [
+  { label: 'Culture', href: '/category/culture' },
+  { label: 'Climate & Science', href: '/category/climate' },
+  { label: 'Mentions', href: '/category/mentions' },
+  { label: 'Earnings', href: '/category/earnings' },
+  { label: 'Finances', href: '/category/finances' },
+  { label: 'Health', href: '/category/health' },
+  { label: 'Entertainment', href: '/category/entertainment' },
 ];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setMoreDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
@@ -72,6 +96,40 @@ export function Header() {
                   </Link>
                 </li>
               ))}
+              
+              {/* More Dropdown */}
+              <li className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+                  className="nav-link px-2 py-1.5 text-xs font-medium text-text-primary flex items-center gap-0.5"
+                >
+                  More
+                  <svg 
+                    className={`w-3 h-3 transition-transform duration-200 ${moreDropdownOpen ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {/* Dropdown Menu */}
+                {moreDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-44 bg-white rounded-lg shadow-lg border border-border py-1 z-50">
+                    {moreItems.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="block px-3 py-2 text-xs font-medium text-text-primary hover:bg-bg-hover hover:text-brand-primary transition-colors"
+                        onClick={() => setMoreDropdownOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </li>
             </ul>
           </div>
 
@@ -171,6 +229,22 @@ export function Header() {
                       ? 'text-brand-primary font-semibold'
                       : 'text-text-primary hover:text-brand-primary'
                   }`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            
+            {/* More section */}
+            <li className="pt-2 mt-2 border-t border-border">
+              <span className="text-xs font-bold text-text-muted uppercase tracking-wide">More Categories</span>
+            </li>
+            {moreItems.map((item) => (
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-2 py-2 text-base font-medium text-text-primary hover:text-brand-primary transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.label}
