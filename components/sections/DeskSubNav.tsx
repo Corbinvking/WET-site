@@ -65,3 +65,4 @@ export function DeskSubNav({ categorySlug, activeChip, className }: DeskSubNavPr
 
 export { deskChips };
 
+

@@ -601,3 +601,4 @@ function getDeskBgColor(desk: EventDesk): string {
   return colors[desk];
 }
 
+

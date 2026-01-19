@@ -591,3 +591,4 @@ export function getDeskColor(desk: EventDesk): string {
   return colors[desk];
 }
 
+

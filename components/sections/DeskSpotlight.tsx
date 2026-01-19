@@ -69,3 +69,4 @@ export function DeskSpotlight({ categorySlug = 'politics' }: DeskSpotlightProps)
   );
 }
 
+
