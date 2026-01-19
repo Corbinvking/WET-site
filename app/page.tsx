@@ -1,6 +1,15 @@
 import Link from 'next/link';
 import { stories } from '@/data/stories';
 import { getMarketById } from '@/data/markets';
+import {
+  WhatMarketNoticed,
+  TopMoversSection,
+  ExplainersSection,
+  VideoCarousel,
+  DeskSpotlight,
+  MarketsPreview,
+  NewsletterCTA,
+} from '@/components/sections';
 
 // Story card components for different sizes
 function HeroStory({ story }: { story: typeof stories[0] }) {
@@ -142,6 +151,7 @@ export default function Home() {
 
   return (
     <div className="bg-white min-h-screen">
+      {/* HERO SECTION - Above the fold */}
       <div className="container-wet py-4">
         {/* Main Grid - CNN Style 3 Column Layout */}
         <div className="grid grid-cols-12 gap-5">
@@ -224,6 +234,32 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* BELOW THE FOLD SECTIONS */}
+      <div className="container-wet">
+        {/* Section 1: What the Market Noticed */}
+        <WhatMarketNoticed />
+
+        {/* Section 2: Top Movers Today */}
+        <TopMoversSection />
+
+        {/* Section 3: Market Explainers */}
+        <ExplainersSection />
+
+        {/* Section 4: Video Carousel */}
+        <div className="relative">
+          <VideoCarousel />
+        </div>
+
+        {/* Section 5: Desk Spotlight */}
+        <DeskSpotlight categorySlug="politics" />
+
+        {/* Section 6: Markets Directory Preview */}
+        <MarketsPreview />
+
+        {/* Section 7: Newsletter CTA */}
+        <NewsletterCTA />
       </div>
     </div>
   );
