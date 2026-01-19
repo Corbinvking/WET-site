@@ -8,3 +8,4 @@ export { DeskSpotlight } from './DeskSpotlight';
 export { MarketsPreview } from './MarketsPreview';
 export { NewsletterCTA } from './NewsletterCTA';
 export { DeskSubNav, deskChips } from './DeskSubNav';
+export { ShortsCarousel } from './ShortsCarousel';

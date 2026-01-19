@@ -6,6 +6,7 @@ import {
   ExplainersSection,
   MarketsPreview,
   NewsletterCTA,
+  ShortsCarousel,
 } from '@/components/sections';
 
 // Helper to get primary listing data
@@ -381,6 +382,9 @@ export default function Home() {
 
         {/* Section: Top Movers Today */}
         <TopMoversSection />
+
+        {/* Section: W.E.T. Shorts */}
+        <ShortsCarousel />
 
         {/* Section: Market Explainers */}
         <ExplainersSection />
