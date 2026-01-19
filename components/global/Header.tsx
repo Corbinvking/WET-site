@@ -35,20 +35,20 @@ export function Header() {
             </button>
             
             {/* Logo + Branding */}
-            <Link href="/" className="flex items-center gap-2 group">
+            <Link href="/" className="flex items-center gap-2 group transition-all duration-200 hover:opacity-80">
               <Image
                 src="/logo.png"
                 alt="W.E.T."
                 width={36}
                 height={36}
-                className="object-contain"
+                className="object-contain transition-transform duration-200 group-hover:scale-105"
                 priority
               />
               <div className="hidden sm:flex flex-col leading-none">
-                <span className="text-sm font-bold text-text-primary tracking-tight">
+                <span className="text-sm font-bold text-text-primary tracking-tight group-hover:text-brand-primary transition-colors duration-200">
                   W.E.T.
                 </span>
-                <span className="text-[9px] font-medium text-text-muted tracking-wide uppercase">
+                <span className="text-[9px] font-medium text-text-muted tracking-wide uppercase group-hover:text-brand-primary/70 transition-colors duration-200">
                   World Event Trading
                 </span>
               </div>
