@@ -20,6 +20,7 @@ import {
   DeskTopMovers,
   DeskDivergence,
   DeskVolume,
+  MarketListTable,
   type PlatformPresence,
   type SortOption,
 } from '@/components/market';
@@ -468,30 +469,21 @@ export default function DeskPageClient({ slug, category, deskConfig }: DeskPageC
           </aside>
         </div>
 
-        {/* ===== BELOW THE FOLD: More Markets Grid ===== */}
-        {gridMarkets.length > 3 && (
+        {/* ===== BELOW THE FOLD: Market List Table ===== */}
+        {filteredMarkets.length > 0 && (
           <section className="border-t border-border py-6">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-0.5 h-4 bg-brand-primary rounded-full" />
               <h2 className="text-xs font-bold text-text-primary uppercase tracking-wide">
-                More {category.name} Markets
+                All {category.name} Markets
               </h2>
-              <span className="text-[10px] text-text-muted">
-                {gridMarkets.length - 3} more
-              </span>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {gridMarkets.slice(3, 13).map((market) => (
-                <DeskMarketCard
-                  key={market.id}
-                  market={market}
-                  coverage={[]}
-                  selectedPlatforms={selectedPlatforms}
-                  variant="compact"
-                />
-              ))}
-            </div>
+            <MarketListTable 
+              markets={filteredMarkets}
+              title={`${category.name} Markets`}
+              showHeader={true}
+            />
           </section>
         )}
 

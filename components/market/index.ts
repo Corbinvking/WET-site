@@ -20,6 +20,7 @@ export { EmptyMarketState } from './EmptyMarketState';
 // Desk page components
 export { DeskTopMovers, DeskDivergence, DeskVolume, DeskGoDeeper, DeskNewsletterCTA } from './DeskRailModules';
 export { DeskCoverageHighlights } from './DeskCoverageHighlights';
+export { MarketListTable } from './MarketListTable';
 
 // Filter components
 export * from './filters';
