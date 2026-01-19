@@ -67,12 +67,14 @@ interface MarketSortDropdownProps {
   value: SortOption;
   onChange: (value: SortOption) => void;
   selectedPlatforms?: Platform[];
+  compact?: boolean;
 }
 
 export function MarketSortDropdown({
   value,
   onChange,
   selectedPlatforms = ['kalshi', 'polymarket'],
+  compact = false,
 }: MarketSortDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -107,12 +109,17 @@ export function MarketSortDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 px-3 py-1.5 bg-bg-surface border border-border rounded-lg text-xs text-text-primary hover:border-brand-primary transition-colors"
+        className={cn(
+          'inline-flex items-center gap-1.5 text-text-primary hover:text-brand-primary transition-colors',
+          compact 
+            ? 'px-2 py-1 text-[10px]' 
+            : 'px-3 py-1.5 bg-bg-surface border border-border rounded-lg text-xs hover:border-brand-primary'
+        )}
       >
         <span className="text-text-muted">Sort:</span>
         <span className="font-medium">{getCurrentLabel()}</span>
         <svg
-          className={cn('w-3.5 h-3.5 text-text-muted transition-transform', isOpen && 'rotate-180')}
+          className={cn('text-text-muted transition-transform', compact ? 'w-2.5 h-2.5' : 'w-3.5 h-3.5', isOpen && 'rotate-180')}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
