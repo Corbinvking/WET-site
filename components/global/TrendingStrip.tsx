@@ -11,7 +11,7 @@ export function TrendingStrip() {
             <span key={topic.slug} className="flex items-center">
               <Link
                 href={`/tag/${topic.slug}`}
-                className="text-xs text-text-secondary hover:text-brand-blue hover:underline transition-colors flex-shrink-0"
+                className="trending-link text-xs text-text-secondary flex-shrink-0 hover:underline"
               >
                 {topic.name}
               </Link>

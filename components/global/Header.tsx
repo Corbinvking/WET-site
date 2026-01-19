@@ -54,10 +54,10 @@ export function Header() {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className={`px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`nav-link px-3 py-2 text-sm font-medium ${
                       'isHighlight' in item && item.isHighlight
-                        ? 'text-brand-primary hover:text-brand-primary/80 font-semibold'
-                        : 'text-text-primary hover:text-brand-primary'
+                        ? 'text-brand-primary font-semibold'
+                        : 'text-text-primary'
                     }`}
                   >
                     {item.label}
@@ -103,18 +103,18 @@ export function Header() {
               </svg>
             </button>
 
-            {/* Subscribe - Blue accent */}
+            {/* Subscribe - Blue accent with shimmer */}
             <Link
               href="/subscribe"
-              className="hidden sm:block px-3 py-1.5 text-xs font-bold text-white bg-brand-primary rounded hover:bg-brand-primary/90 transition-colors"
+              className="btn-primary hidden sm:block px-3 py-1.5 text-xs font-bold rounded"
             >
               Subscribe
             </Link>
 
-            {/* Sign In */}
+            {/* Sign In - with border glow on hover */}
             <Link
               href="/signin"
-              className="hidden sm:block px-3 py-1.5 text-xs font-medium text-text-primary border border-border rounded hover:border-brand-primary hover:text-brand-primary transition-colors"
+              className="card-hover hidden sm:block px-3 py-1.5 text-xs font-medium text-text-primary rounded"
             >
               Sign In
             </Link>

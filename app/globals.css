@@ -49,7 +49,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Container */
+/* ============================================
+   CONTAINER
+   ============================================ */
 .container-wet {
   max-width: 1280px;
   margin-left: auto;
@@ -72,12 +74,15 @@ body {
   }
 }
 
-/* Headline hierarchy */
+/* ============================================
+   HEADLINE HIERARCHY
+   ============================================ */
 .headline-hero {
   font-size: 1.5rem;
   line-height: 1.2;
   font-weight: 700;
   color: var(--color-text-primary);
+  transition: color 0.2s ease;
 }
 
 @media (min-width: 768px) {
@@ -97,6 +102,7 @@ body {
   line-height: 1.3;
   font-weight: 700;
   color: var(--color-text-primary);
+  transition: color 0.2s ease;
 }
 
 @media (min-width: 768px) {
@@ -110,6 +116,7 @@ body {
   line-height: 1.3;
   font-weight: 700;
   color: var(--color-text-primary);
+  transition: color 0.2s ease;
 }
 
 .headline-small {
@@ -117,6 +124,7 @@ body {
   line-height: 1.4;
   font-weight: 600;
   color: var(--color-text-primary);
+  transition: color 0.2s ease;
 }
 
 .headline-compact {
@@ -124,9 +132,12 @@ body {
   line-height: 1.4;
   font-weight: 500;
   color: var(--color-text-primary);
+  transition: color 0.2s ease;
 }
 
-/* Tag/Label styles */
+/* ============================================
+   TAG / LABEL STYLES
+   ============================================ */
 .tag-breaking {
   display: inline-flex;
   align-items: center;
@@ -176,9 +187,56 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* Accent underline - playful touch */
+/* ============================================
+   SLEEK HOVER EFFECTS
+   ============================================ */
+
+/* Story card hover - image zoom + shadow lift */
+.story-card {
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.story-card:hover {
+  transform: translateY(-2px);
+}
+
+.story-card .story-image {
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.story-card .story-image img,
+.story-card .story-image > div {
+  transition: transform 0.3s ease;
+}
+
+.story-card:hover .story-image img,
+.story-card:hover .story-image > div {
+  transform: scale(1.03);
+}
+
+/* Article link hover with underline animation */
+.article-link {
+  position: relative;
+  display: inline;
+  text-decoration: none;
+  background-image: linear-gradient(var(--color-brand-primary), var(--color-brand-primary));
+  background-size: 0% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease, color 0.2s ease;
+}
+
+.article-link:hover {
+  color: var(--color-brand-primary);
+  background-size: 100% 2px;
+}
+
+/* Accent underline - sliding animation */
 .accent-underline {
   position: relative;
+  display: inline-block;
 }
 
 .accent-underline::after {
@@ -191,12 +249,158 @@ body {
   background: linear-gradient(90deg, var(--color-brand-primary) 0%, var(--color-brand-accent) 100%);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .accent-underline:hover::after {
   transform: scaleX(1);
 }
+
+/* Button hover effects */
+.btn-primary {
+  background-color: var(--color-brand-primary);
+  color: white;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-brand-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.25);
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+/* Card hover with glow */
+.card-hover {
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.card-hover:hover {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Image container hover overlay */
+.image-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 102, 204, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.image-hover:hover::after {
+  opacity: 1;
+}
+
+/* Nav link hover */
+.nav-link {
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-brand-primary);
+  transition: all 0.2s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover {
+  color: var(--color-brand-primary);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Trending topic hover */
+.trending-link {
+  transition: color 0.15s ease;
+  position: relative;
+}
+
+.trending-link:hover {
+  color: var(--color-brand-primary);
+}
+
+/* Market pill hover */
+.market-pill {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.market-pill:hover {
+  background-color: var(--color-brand-primary);
+  color: white;
+  transform: scale(1.02);
+}
+
+/* Thumbnail hover zoom */
+.thumb-hover {
+  overflow: hidden;
+  border-radius: 0.375rem;
+}
+
+.thumb-hover > * {
+  transition: transform 0.3s ease;
+}
+
+.thumb-hover:hover > * {
+  transform: scale(1.08);
+}
+
+/* Video play button pulse */
+.play-button {
+  transition: all 0.2s ease;
+}
+
+.play-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 8px rgba(0, 102, 204, 0.2);
+}
+
+/* Social icon hover */
+.social-icon {
+  transition: all 0.2s ease;
+}
+
+.social-icon:hover {
+  color: var(--color-brand-primary);
+  transform: translateY(-2px);
+}
+
+/* ============================================
+   GRADIENT & GLOW EFFECTS
+   ============================================ */
 
 /* Gradient text for special highlights */
 .text-gradient {
@@ -211,7 +415,15 @@ body {
   box-shadow: 0 0 20px rgba(0, 102, 204, 0.15);
 }
 
-/* Hide scrollbar utility */
+.glow-accent-strong {
+  box-shadow: 0 0 30px rgba(0, 102, 204, 0.25);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Hide scrollbar */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -220,7 +432,7 @@ body {
   scrollbar-width: none;
 }
 
-/* Utility colors */
+/* Background colors */
 .bg-bg-primary { background-color: var(--color-bg-primary); }
 .bg-bg-secondary { background-color: var(--color-bg-secondary); }
 .bg-bg-elevated { background-color: var(--color-bg-elevated); }
@@ -229,16 +441,19 @@ body {
 .bg-bg-dark { background-color: var(--color-bg-dark); }
 .bg-bg-accent { background-color: var(--color-bg-accent); }
 
+/* Text colors */
 .text-text-primary { color: var(--color-text-primary); }
 .text-text-secondary { color: var(--color-text-secondary); }
 .text-text-muted { color: var(--color-text-muted); }
 .text-text-subtle { color: var(--color-text-subtle); }
 .text-text-inverse { color: var(--color-text-inverse); }
 
+/* Border colors */
 .border-border { border-color: var(--color-border); }
 .border-border-light { border-color: var(--color-border-light); }
 .border-border-accent { border-color: var(--color-border-accent); }
 
+/* Brand background colors */
 .bg-brand-primary { background-color: var(--color-brand-primary); }
 .bg-brand-blue { background-color: var(--color-brand-primary); }
 .bg-brand-blue-light { background-color: var(--color-brand-blue-light); }
@@ -246,18 +461,32 @@ body {
 .bg-brand-gold { background-color: var(--color-brand-gold); }
 .bg-brand-red { background-color: var(--color-brand-red); }
 
+/* Brand text colors */
 .text-brand-primary { color: var(--color-brand-primary); }
 .text-brand-blue { color: var(--color-brand-primary); }
 .text-brand-accent { color: var(--color-brand-accent); }
 .text-brand-gold { color: var(--color-brand-gold); }
 .text-brand-red { color: var(--color-brand-red); }
 
+/* Market colors */
 .text-market-up { color: var(--color-market-up); }
 .text-market-down { color: var(--color-market-down); }
 .text-market-neutral { color: var(--color-market-neutral); }
 
+/* Live indicator */
 .text-live { color: var(--color-live); }
 .bg-live { background-color: var(--color-live); }
 
-/* Hover border accent */
+/* Hover utilities */
 .hover\:border-brand-primary:hover { border-color: var(--color-brand-primary); }
+.hover\:text-brand-primary:hover { color: var(--color-brand-primary); }
+.hover\:bg-brand-primary:hover { background-color: var(--color-brand-primary); }
+
+/* Transition utilities */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-bounce {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

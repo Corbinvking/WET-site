@@ -47,12 +47,12 @@ export function Footer() {
               World Event Trading. The newsroom built for prediction market traders.
             </p>
             <div className="mt-3 flex gap-2">
-              {/* Social Icons - hover to blue */}
+              {/* Social Icons - sleek hover effects */}
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 text-slate-400 hover:text-brand-primary transition-colors"
+                className="social-icon p-1.5 text-slate-400"
                 aria-label="Twitter"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@ export function Footer() {
                 href="https://discord.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 text-slate-400 hover:text-brand-primary transition-colors"
+                className="social-icon p-1.5 text-slate-400"
                 aria-label="Discord"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
